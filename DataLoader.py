@@ -143,6 +143,28 @@ class DrawPath:
         return image
 
 
+def visualize_last_run():
+     # Loads All Data
+    data_loader = DataLoader()
+    print(f"{len(data_loader)} files Loaded")
+    # Get Last Run
+    point = data_loader.trials_loaded[-1]
+    # Get Processed Point
+    processed_points = ClusterPointsToIntersections(point).chained_points
+    # Show Chained Points
+    DrawPath(processed_points)
+
+
+def visualize_all_runs():
+    # Loads All Data
+    data_loader = DataLoader()
+    print(f"{len(data_loader)} files Loaded")
+    # Process Points For Each File
+    for point in data_loader.trials_loaded:
+        # Get Processed Point
+        processed_points = ClusterPointsToIntersections(point).chained_points
+        # Show Chained Points
+        DrawPath(processed_points)
 
 
 # Brings Trial Files to Json Analyze File
