@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 import math
 import json
+import re
 
 def remove_duplicate_points(points):
     new_points = []
@@ -21,12 +22,24 @@ def remove_duplicate_points(points):
             new_points.append(point)
     return np.array(new_points)
 
+def atoi(text):
+    return int(text) if text.isdigit() else text
+
+def natural_keys(text):
+    '''
+    alist.sort(key=natural_keys) sorts in human order
+    http://nedbatchelder.com/blog/200712/human_sorting.html
+    (See Toothy's implementation in the comments)
+    '''
+    return [atoi(c) for c in re.split(r'(\d+)', text)]
 
 class DataLoader:
 
     def __init__(self, data_folder = "piece_trials"):
         # Load Image Locations
         piece_trials_locations = glob.glob(data_folder + "/*")
+        # Sort Properly
+        piece_trials_locations.sort(key=natural_keys)
         # Load Piece Trials
         self.trials_loaded = self.load_trials(piece_trials_locations)
 
@@ -166,7 +179,6 @@ def visualize_all_runs():
         # Show Chained Points
         DrawPath(processed_points)
 
-
 # Brings Trial Files to Json Analyze File
 if __name__ == "__main__":
     
@@ -181,15 +193,18 @@ if __name__ == "__main__":
         # Get Processed Point
         processed_points = ClusterPointsToIntersections(point).chained_points
         # # Show Chained Points
-        # DrawPath(processed_points)
+        DrawPath(processed_points)
         data_total.append(processed_points.tolist())
 
     # Open Json Data
     json_loaded = None
-    with open('final_runs.json', 'r') as f:
-        json_loaded = json.loads(f.read())
+    if os.path.exists('final_runs.json'):
+        with open('final_runs.json', 'r') as f:
+            json_loaded = json.loads(f.read())
+    else:
+        json_loaded = {}
     if json_loaded is None:
-        raise Exception("Json not Loaded Correctly")
+        raise Exception("Json Not Loaded Correctly")
     
     # Start Json Save Number
     file_counter = 0
