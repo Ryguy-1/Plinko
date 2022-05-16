@@ -6,6 +6,8 @@ import cv2
 import threading
 import time
 from datetime import datetime
+from DataLoader import visualize_last_trial_and_get_chained_points
+import json
 
 # Analyzes Webcam Feed. Draws Contours. Updates Member Variable: self.board_representation based on Web Cam Feed
 class BoardViewer:
@@ -81,6 +83,9 @@ class BoardViewer:
                         # Empty Array
                         self.current_piece_location_over_time = []
                         self.current_piece_num += 1
+                        
+                        # See Chained Points
+                        visualize_last_trial()
 
                 # Combine Images To Track Piece
                 # mask = saturation

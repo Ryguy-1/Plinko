@@ -4,6 +4,23 @@ import glob
 import numpy as np
 import cv2
 import math
+import json
+
+def remove_duplicate_points(points):
+    new_points = []
+    for point in points:
+        if len(new_points) == 0:
+            new_points.append(point)
+            continue
+        found_match = False
+        for new_point in new_points:
+            if np.array_equal(point, new_point):
+                found_match = True
+                break
+        if not found_match:
+            new_points.append(point)
+    return np.array(new_points)
+
 
 class DataLoader:
 
@@ -12,6 +29,9 @@ class DataLoader:
         piece_trials_locations = glob.glob(data_folder + "/*")
         # Load Piece Trials
         self.trials_loaded = self.load_trials(piece_trials_locations)
+
+    def __len__(self):
+        return len(self.trials_loaded)
 
     # Loads Single Trial
     def load_array(self, location):
@@ -25,10 +45,13 @@ class DataLoader:
         trials_loaded = []
         for trial in piece_trials_locations:
             trials_loaded.append(self.load_array(trial))
-        return np.array(trials_loaded)
+        return trials_loaded
 
 
 class ClusterPointsToIntersections:
+
+    # Max Line Length
+    max_line_length = 300
 
     # Vertical Horizontal Threshold Distance
     vh_threshold = 300
@@ -37,7 +60,7 @@ class ClusterPointsToIntersections:
         # Lines Location
         self.lines_location = lines_location
         # Points
-        self.points = points
+        self.points = np.array(points)
         # Load Lines
         with open(self.lines_location, 'rb') as f:
             self.loaded_lines = pickle.load(f)
@@ -45,6 +68,18 @@ class ClusterPointsToIntersections:
         self.intersection_points = self.get_intersection_points_from_lines(self.loaded_lines)
         # Cluster Points to Intersection Points
         self.clustered_points = self.cluster(self.points, self.intersection_points)
+        # Chain Points a Max Distance Away
+        self.chained_points = self.chain_points(self.clustered_points)
+        print(f"Chained Points Shape: {self.chained_points.shape}")
+
+    # Chains Points A Max Distance Away
+    def chain_points(self, points):
+        chained_points = []
+        for point1, point2 in zip(points, points[1:]):
+            if math.sqrt((point1[0]-point2[0])**2 + (point1[1]-point2[1])**2) < self.max_line_length:
+                chained_points.append(point1)
+                chained_points.append(point2)
+        return remove_duplicate_points(chained_points)
 
     def cluster(self, points, intersection_points):
         def closest_node(node, nodes):
@@ -54,7 +89,7 @@ class ClusterPointsToIntersections:
         clustered_points = []
         for point in points:
             clustered_points.append(closest_node(point, intersection_points))
-        return clustered_points
+        return remove_duplicate_points(clustered_points)
 
 
     def get_intersection_points_from_lines(self, lines):
@@ -77,34 +112,29 @@ class ClusterPointsToIntersections:
             for y in y_coords_horizontal_lines:
                 intersection_points.append((x, y))
             
-        return np.array(intersection_points)
+        return intersection_points
+
+
 
 class DrawPath:
 
-    # Max Line Length
-    max_line_length = 300
-
-    def __init__(self, position_vs_time, intersection_points, unclustered_points, board_image = 'cached_data/board.jpg'):
-        if position_vs_time is None or len(position_vs_time) == 0:
-            raise Exception("No Path to Trace")
-        # (x, y) array
-        self.position_vs_time = position_vs_time
+    def __init__(self, points, board_image = 'cached_data/board.jpg'):
+        # Points
+        points = points
         # Board Jpg
         self.board = cv2.imread(board_image)
         # Draw Lines
-        self.board = self.draw_path(self.board, self.position_vs_time)
+        self.board = self.draw_path(self.board, points)
         # Plot Points
-        # self.board = self.draw_points(self.board, intersection_points, color = (0, 255, 0))
-        # self.board = self.draw_points(self.board, unclustered_points, color = (255, 0, 0))
-        self.board = self.draw_points(self.board, self.position_vs_time)
+        self.board = self.draw_points(self.board, points)
         # Show Image
         cv2.imshow("Plotted Route", self.board)
         cv2.waitKey(0)
+        cv2.destroyWindow("Plotted Route")
 
     def draw_path(self, image, points):
         for point1, point2 in zip(points, points[1:]):
-            if math.sqrt((point1[0]-point2[0])**2 + (point1[1]-point2[1])**2) < self.max_line_length:
-                image = cv2.line(image, point1, point2, [0, 255, 0], 2) 
+            image = cv2.line(image, point1, point2, [0, 255, 0], 2)
         return image
 
     def draw_points(self, image, points, color = (0, 0, 255)):
@@ -113,8 +143,40 @@ class DrawPath:
         return image
 
 
+
+
+# Brings Trial Files to Json Analyze File
 if __name__ == "__main__":
-    data_loader = DataLoader(data_folder = "piece_trials")
-    for trial in data_loader.trials_loaded:
-        clustered_points = ClusterPointsToIntersections(trial)
-        draw_path = DrawPath(clustered_points.clustered_points, clustered_points.intersection_points, trial)
+    
+    # Loads All Data
+    data_loader = DataLoader()
+    print(f"{len(data_loader)} files Loaded")
+
+    # Initialize Processed Points
+    data_total = []
+    # Process Points For Each File
+    for point in data_loader.trials_loaded:
+        # Get Processed Point
+        processed_points = ClusterPointsToIntersections(point).chained_points
+        # # Show Chained Points
+        # DrawPath(processed_points)
+        data_total.append(processed_points.tolist())
+
+    # Open Json Data
+    json_loaded = None
+    with open('final_runs.json', 'r') as f:
+        json_loaded = json.loads(f.read())
+    if json_loaded is None:
+        raise Exception("Json not Loaded Correctly")
+    
+    # Start Json Save Number
+    file_counter = 0
+    # Append New Data and Save Json
+    for data in data_total:
+        print(data)
+        json_loaded[f'Run {file_counter}'] = data
+        file_counter += 1
+    
+    # Save Json
+    with open('final_runs.json', 'w') as f:
+        json.dump(json_loaded, f, ensure_ascii=False, indent=4)
