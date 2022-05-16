@@ -131,7 +131,7 @@ class ClusterPointsToIntersections:
 
 class DrawPath:
 
-    def __init__(self, points, board_image = 'cached_data/board.jpg'):
+    def __init__(self, points, board_image = 'cached_data/board.jpg', show = True):
         # Points
         points = points
         # Board Jpg
@@ -141,9 +141,11 @@ class DrawPath:
         # Plot Points
         self.board = self.draw_points(self.board, points)
         # Show Image
-        cv2.imshow("Plotted Route", self.board)
-        cv2.waitKey(0)
-        cv2.destroyWindow("Plotted Route")
+        if show:
+            cv2.imshow("Plotted Route", self.board)
+            cv2.waitKey(0)
+            cv2.destroyWindow("Plotted Route")
+        # Can not show and get image from self.board
 
     def draw_path(self, image, points):
         for point1, point2 in zip(points, points[1:]):

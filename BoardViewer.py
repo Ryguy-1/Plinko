@@ -22,7 +22,7 @@ class BoardViewer:
         '''
         # Array Like [(x1, y1), (x2, y2), ...]
         self.current_piece_location_over_time = []
-        self.current_piece_num = 0 # Update This for Starting Save Index
+        self.current_piece_num = 64 # Update This for Starting Save Index
 
         # Canny Edge Detection Lower, Upper
         self.canny_lower = 70
