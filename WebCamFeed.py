@@ -14,7 +14,7 @@ import re
 class WebCamFeed:
 
     # Title of Frame
-    frame_title = "Checkers Board Viewer [('q') to Quit, ('r') to Reset Mask, ('u') to Undo Line, ('s') to Start/Stop Trial, ('d') to Delete Last Trial]"
+    frame_title = "Plinko Board Viewer [('q') to Quit, ('r') to Reset Mask, ('u') to Undo Line, ('s') to Start/Stop Trial, ('d') to Delete Last Trial]"
 
     # Purpose: Initialize Video Capture / Member Variables
     def __init__(self, frame_width, frame_height):

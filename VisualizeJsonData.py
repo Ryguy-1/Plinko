@@ -1,3 +1,4 @@
+from audioop import avg
 import matplotlib.pyplot as plt
 import numpy as np
 import json
@@ -51,5 +52,6 @@ if __name__ == "__main__":
             avg_image = cv2.addWeighted(boards[i], alpha, avg_image, beta, 0.0)
 
     cv2.imshow('Final Image', avg_image)
+    cv2.imwrite('average_image.jpg', avg_image)
     cv2.waitKey(0)
 
