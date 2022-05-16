@@ -1,4 +1,5 @@
 from datetime import datetime
+import glob
 import cv2
 import keyboard
 import threading
@@ -6,13 +7,14 @@ import numpy as np
 import time
 import pickle
 import os
+import re
 
 
 # Encapsulates WebCam Feed. (Get Current Frame through web_cam_feed.current_frame)
 class WebCamFeed:
 
     # Title of Frame
-    frame_title = "Checkers Board Viewer [('q') to Quit, ('r') to Reset Mask, ('u') to Undo Line]"
+    frame_title = "Checkers Board Viewer [('q') to Quit, ('r') to Reset Mask, ('u') to Undo Line, ('s') to Start/Stop Trial, ('d') to Delete Last Trial]"
 
     # Purpose: Initialize Video Capture / Member Variables
     def __init__(self, frame_width, frame_height):
@@ -105,9 +107,25 @@ class WebCamFeed:
                     self.start_time = 0
                     self.is_timing = False
                     time.sleep(0.3)
+            elif keyboard.is_pressed('d'):
+                trial_locations = glob.glob('piece_trials/*')
+                trial_locations.sort(key=self.natural_keys)
+                if len(trial_locations) > 0:
+                    os.remove(trial_locations[-1])
+                time.sleep(0.3)
 
 
-            
+    def atoi(self, text):
+        return int(text) if text.isdigit() else text
+
+    def natural_keys(self, text):
+        '''
+        alist.sort(key=natural_keys) sorts in human order
+        http://nedbatchelder.com/blog/200712/human_sorting.html
+        (See Toothy's implementation in the comments)
+        '''
+        return [ self.atoi(c) for c in re.split(r'(\d+)', text) ]
+
 
     # Purpose: Make Left Click Bind to Crop Function
     def prompt_crop(self):
