@@ -24,15 +24,14 @@ class BoardViewer:
         self.current_piece_location_over_time = []
         self.current_piece_num = 64 # Update This for Starting Save Index
 
-        # Canny Edge Detection Lower, Upper
-        self.canny_lower = 70
-        self.canny_upper = 90
         # Minimum Area Considered as Piece
-        self.contour_area_cutoff_min = 100
+        self.contour_area_cutoff_min = 200
         # Maximum Area Considered as Piece
         self.contour_area_cutoff_max = 100000
         # Saturation Minimum
         self.saturation_cutoff = 120
+        # Value Minimum (For Shadows)
+        self.value_cutoff = 110
         # Vertical Horizontal Threshold Distance
         self.vh_threshold = 300
         # Frame Delay
@@ -40,10 +39,28 @@ class BoardViewer:
         # Thread which takes info from the webcam feed and constantly updates contour and board information
         self.analyze_thread = threading.Thread(target=self.analyze_board).start()
 
+    '''
+        All For Sliders
+    '''
+    def saturation_cutoff_change(self, val):
+        self.saturation_cutoff = val
 
+    def value_cutoff_change(self, val):
+        self.value_cutoff = val
+
+    def contour_area_cutoff_min_change(self, val):
+        self.contour_area_cutoff_min = val
+
+    def contour_area_cutoff_max_change(self, val):
+        self.contour_area_cutoff_max = val
+    
+    '''
+        Main Loop
+    '''
     # Purpose: Main Update Loop. Takes Recent frame from self.webcam_feed and acts on it.
     def analyze_board(self):
-
+        # Used for Initialization of Sliders
+        is_first_show = True
         while self.webcam_feed.is_running:
             # If the current frame isn't empty (on initialization)
             if self.webcam_feed.current_frame.all() is not None:
@@ -53,8 +70,11 @@ class BoardViewer:
                 hue, saturation, value = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
                 #Threshold Saturation
                 _, saturation = cv2.threshold(saturation, self.saturation_cutoff, 255, cv2.THRESH_BINARY)
-                # cv2.imshow('saturation', saturation)
-                # cv2.imshow('value', value)
+                # Set Saturation Greyscale to 0 where value is less than value cutoff
+                # Get pixels lower than threshold (value)
+                _, value = cv2.threshold(value, self.value_cutoff, 255, cv2.THRESH_BINARY)
+                # Mask Saturation with Value
+                saturation = cv2.bitwise_and(saturation, saturation, mask=value)
                 # Find Contours
                 (contours, hierarchy) = cv2.findContours(saturation.copy(), cv2.RETR_TREE,
                                                          cv2.CHAIN_APPROX_SIMPLE)
@@ -94,6 +114,21 @@ class BoardViewer:
                 image = self.draw_lines(image)
                 # Show the image
                 cv2.imshow(self.webcam_feed.frame_title, image)
+                # If First Run, Add Sliders
+                if is_first_show:
+                    # Saturation
+                    cv2.createTrackbar('Saturation Cutoff', self.webcam_feed.frame_title, self.saturation_cutoff, 255,
+                                       self.contour_area_cutoff_min_change)
+                    # Value
+                    cv2.createTrackbar('Value Cutoff', self.webcam_feed.frame_title, self.value_cutoff, 255,
+                                       self.contour_area_cutoff_min_change)
+                    # Min Area Slider
+                    cv2.createTrackbar('Min Area', self.webcam_feed.frame_title, self.contour_area_cutoff_min, 400,
+                                       self.contour_area_cutoff_min_change)
+                    # Max Area Slider
+                    cv2.createTrackbar('Max Area', self.webcam_feed.frame_title, self.contour_area_cutoff_max, 400,
+                                       self.contour_area_cutoff_max_change)
+                    is_first_show = False
                 # Wait in between frames
                 cv2.waitKey(self.frame_delay)
 
