@@ -9,7 +9,6 @@ import pickle
 import os
 import re
 
-
 # Encapsulates WebCam Feed. (Get Current Frame through web_cam_feed.current_frame)
 class WebCamFeed:
 

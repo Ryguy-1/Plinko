@@ -1,13 +1,9 @@
 import pickle
-import numpy as np
 from WebCamFeed import WebCamFeed
 import cv2
 import threading
-import time
 from datetime import datetime
 from DataLoader import visualize_last_run
-import json
-from intersect import intersection
 
 # Analyzes Webcam Feed. Draws Contours. Updates Member Variable: self.board_representation based on Web Cam Feed
 class BoardViewer:
