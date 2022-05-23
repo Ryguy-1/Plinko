@@ -15,7 +15,7 @@ def load_json(location = "final_runs.json"):
 if __name__ == "__main__":
 
     # For Loading Data
-    mm_list = ['30mm', '31mm', '33mm']
+    mm_list = ['30mm', '31mm', '33mm', 'Open']
 
     # Saved Lists
     variations_vs_depth_mm = {} # Like {'30mm': [1, 1, 4, 15, ...], ...}
@@ -118,10 +118,25 @@ if __name__ == "__main__":
 
     print(variations_vs_depth_mm)
 
+    # Plots Variations vs Depth for Different Precisions
     for key, value in variations_vs_depth_mm.items():
         plt.plot([i for i in range(len(value))], value, label = key)
     plt.xlabel('Depth')
     plt.ylabel('Unique Variations')
     plt.legend()
     plt.title('Unique Variations vs Depth for Starting Precisions')
+    plt.show()
+
+    # Plots Last Unique Variation Depth
+    trials_per_precision = 100
+    names = []
+    values = []
+
+    plt.figure()
+    for key, value in variations_vs_depth_mm.items():
+        names.append(key)
+        values.append(value.index(trials_per_precision))
+    plt.bar(names, values)
+    plt.title('Depth of Last Unique Variation Per Precision')
+    plt.ylabel('Depth')
     plt.show()
