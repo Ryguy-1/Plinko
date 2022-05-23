@@ -59,6 +59,7 @@ if __name__ == "__main__":
     '''
     rows = {}
     all_chains = data.values()
+    all_chains = list(all_chains)
     # Calculate Minimum Nodes Reached by a Chain
     min_nodes = 255
     for chain in all_chains:
@@ -79,14 +80,27 @@ if __name__ == "__main__":
             # If Already In, Add One
             node_tracker[f'Row {i}'][str(chain[i])] += 1
 
-    print(node_tracker)
-    for row in node_tracker.keys():
-        print(len(node_tracker[row]))
+    # print(node_tracker)
 
 
     '''
-        Unique Combinations Within X Number of Moves
+        Unique Combinations Within X Number of Moves (Like Chess Openings) -> The less here the more consistent
     '''
-    unique_within_x_moves = [] # Array like [[[x, y], [x,  y]], []]
-    # 
+    # Initialize moves_unique
+    max_depth = 14
+    moves_unique = {} # Like {'combinations depth 1': [[[x, y]]], 'combinations depth 2': [[[x, y], [x, y]], [[x, y], [x, y]], ...], ...}
+    for i in range(min(max_depth, len(all_chains[i]))):
+        moves_unique[f'Combinations Depth {i}'] = []
+    # Iterate Through all_chains
+    for i in range(len(all_chains)):
+        for j in range(min(max_depth, len(all_chains[i]))):
+            # Declare Chain so Far
+            chain_so_far = all_chains[i][0:j]
+            if chain_so_far not in moves_unique[f"Combinations Depth {j}"]:
+                moves_unique[f"Combinations Depth {j}"].append(chain_so_far)
+    for key, value in moves_unique.items():
+        value = list(value)
+        print(f"{key} Length: {len(value)}")
+
+            
 

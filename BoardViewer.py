@@ -66,6 +66,10 @@ class BoardViewer:
             if self.webcam_feed.current_frame.all() is not None:
                 # Grab current frame from WebCamFeed
                 image = self.webcam_feed.current_frame
+
+                '''
+                    Saturation Method (All Bright Colored Chips)
+                '''
                 # Convert to HSV (Hue, Saturation, Value) -> Value
                 hue, saturation, value = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
                 #Threshold Saturation
