@@ -23,7 +23,7 @@ class BoardViewer:
         '''
         # Array Like [(x1, y1), (x2, y2), ...]
         self.current_piece_location_over_time = []
-        self.current_piece_num = 64 # Update This for Starting Save Index
+        self.current_piece_num = 0 # Update This for Starting Save Index
 
         # Minimum Area Considered as Piece
         self.contour_area_cutoff_min = 200
@@ -32,11 +32,11 @@ class BoardViewer:
         # Saturation Minimum
         self.saturation_cutoff = 120
         # Value Minimum (For Shadows)
-        self.value_cutoff = 110
+        self.value_cutoff = 130
         # Vertical Horizontal Threshold Distance
         self.vh_threshold = 300
         # Frame Delay
-        self.frame_delay = 5
+        self.frame_delay = 1
         # Thread which takes info from the webcam feed and constantly updates contour and board information
         self.analyze_thread = threading.Thread(target=self.analyze_board).start()
 
@@ -80,6 +80,10 @@ class BoardViewer:
                 _, value = cv2.threshold(value, self.value_cutoff, 255, cv2.THRESH_BINARY)
                 # Mask Saturation with Value
                 saturation = cv2.bitwise_and(saturation, saturation, mask=value)
+
+                '''
+                    Draw Circle Around Piece
+                '''
                 # Find Contours
                 (contours, hierarchy) = cv2.findContours(saturation.copy(), cv2.RETR_TREE,
                                                          cv2.CHAIN_APPROX_SIMPLE)
@@ -116,10 +120,14 @@ class BoardViewer:
                 # mask = saturation
                 # image[mask==255] = (36, 12, 255)
 
+                '''
+                    Draw Intersection Points (Kinda Slow)
+                '''
                 # Get Intersection Points
                 intersection_points = self.get_intersection_points_from_lines(lines=self.webcam_feed.lines_coords)
                 # Draw Intersection Points
                 image = self.draw_points(image, intersection_points)
+
                 # Draw Lines
                 image = self.draw_lines(image)
                 # Show the image

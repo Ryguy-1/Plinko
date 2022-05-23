@@ -15,43 +15,43 @@ def load_json(location = "final_runs.json"):
 if __name__ == "__main__":
 
     # Load Json
-    data = load_json()
+    data = load_json(location = "project_used_data/31mm/final_runs.json")
 
     '''
         Plots End Distribution
     '''
-    # # Get Ending X Coordinates
-    # ending_x_coordinates = []
-    # for coords in data.values():
-    #     end_coord = coords[-1]
-    #     end_x = end_coord[0]
-    #     ending_x_coordinates.append(end_x)
-    # plt.hist(ending_x_coordinates, bins=np.arange(np.min(ending_x_coordinates), np.max(ending_x_coordinates)+1), rwidth=10)
-    # plt.show()
+    # Get Ending X Coordinates
+    ending_x_coordinates = []
+    for coords in data.values():
+        end_coord = coords[-1]
+        end_x = end_coord[0]
+        ending_x_coordinates.append(end_x)
+    plt.hist(ending_x_coordinates, bins=np.arange(np.min(ending_x_coordinates), np.max(ending_x_coordinates)+1), rwidth=10)
+    plt.show()
 
 
 
     '''
         Plots Overlay of Runs
     '''
-    # # Get All Images of Paths
-    # boards = []
-    # for coords in data.values():
-    #     boards.append(DrawPath(coords, show = False).board)
+    # Get All Images of Paths
+    boards = []
+    for coords in data.values():
+        boards.append(DrawPath(coords, show = False).board)
     
-    # # Average Images
-    # avg_image = boards[0]
-    # for i in range(len(boards)):
-    #     if i == 0:
-    #         pass
-    #     else:
-    #         alpha = 1.0/(i + 1)
-    #         beta = 1.0 - alpha
-    #         avg_image = cv2.addWeighted(boards[i], alpha, avg_image, beta, 0.0)
+    # Average Images
+    avg_image = boards[0]
+    for i in range(len(boards)):
+        if i == 0:
+            pass
+        else:
+            alpha = 1.0/(i + 1)
+            beta = 1.0 - alpha
+            avg_image = cv2.addWeighted(boards[i], alpha, avg_image, beta, 0.0)
 
-    # cv2.imshow('Final Image', avg_image)
-    # # cv2.imwrite('average_image.jpg', avg_image)
-    # cv2.waitKey(0)
+    cv2.imshow('Final Image', avg_image)
+    # cv2.imwrite('average_image.jpg', avg_image)
+    cv2.waitKey(0)
 
 
     '''
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         Unique Combinations Within X Number of Moves (Like Chess Openings) -> The less here the more consistent
     '''
     # Initialize moves_unique
-    max_depth = 14
+    max_depth = 15
     moves_unique = {} # Like {'combinations depth 1': [[[x, y]]], 'combinations depth 2': [[[x, y], [x, y]], [[x, y], [x, y]], ...], ...}
     for i in range(min(max_depth, len(all_chains[i]))):
         moves_unique[f'Combinations Depth {i}'] = []

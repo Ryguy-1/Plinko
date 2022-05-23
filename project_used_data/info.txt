@@ -1,0 +1,5 @@
+Each Accuracy Has 4 Items:
+- piece_trials
+- board.jpg
+- lines.pkl
+- final_runs.json
