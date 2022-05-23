@@ -105,10 +105,33 @@ class ClusterPointsToIntersections:
         return remove_duplicate_points(clustered_points)
 
 
+    # Get Intersection Points of Lines
     def get_intersection_points_from_lines(self, lines):
+
+        # Took From Online
+        def line(p1, p2):
+            A = (p1[1] - p2[1])
+            B = (p2[0] - p1[0])
+            C = (p1[0]*p2[1] - p2[0]*p1[1])
+            return A, B, -C
+
+        # Took From Online
+        def find_intersection(L1, L2):
+            D  = L1[0] * L2[1] - L1[1] * L2[0]
+            Dx = L1[2] * L2[1] - L1[1] * L2[2]
+            Dy = L1[0] * L2[2] - L1[2] * L2[0]
+            if D != 0:
+                x = Dx / D
+                y = Dy / D
+                return x,y
+            else:
+                return False
+
         intersection_points = [] # Like [(x1, y1), ...]
 
-        x_coords_vertical_lines = []; y_coords_horizontal_lines = []
+        # Sort Lines by Horizontal and Vertical
+        vertical_lines = []
+        horizontal_lines = []
         # Get Y Coordinates of Horizontal Lines / X Coordinates of Vertical Lines
         for line_coords in lines:
             # Lines Coords
@@ -116,15 +139,33 @@ class ClusterPointsToIntersections:
             x2, y2 = line_coords[1]
             # Color Depends on Orientation
             if abs(y1-y2) > self.vh_threshold: # Vertical Lines
-                x_coords_vertical_lines.append(round(np.mean([x1, x2])))
+                vertical_lines.append(line_coords)
             elif abs(x1-x2) > self.vh_threshold: # Horizontal Lines
-                y_coords_horizontal_lines.append(round(np.mean([y1, y2])))
+                horizontal_lines.append(line_coords)
 
-        # Get Intersection Points
-        for x in x_coords_vertical_lines:
-            for y in y_coords_horizontal_lines:
-                intersection_points.append((x, y))
-            
+        # Get Y Coordinates of Horizontal Lines / X Coordinates of Vertical Lines
+        for horizontal in horizontal_lines:
+            for vertical in vertical_lines:
+                # Get Lines
+                L1 = line(horizontal[0], horizontal[1])
+                L2 = line(vertical[0], vertical[1])
+                # Find Intersection Point
+                intersection = find_intersection(L1, L2)
+                # Check if there is intesection point and not already added
+                if intersection is not False and intersection not in intersection_points:
+                    # Check if is within bounds
+                    x1 = horizontal[0][0]; y1 = horizontal[0][1]
+                    x2 = horizontal[1][0]; y2 = horizontal[1][1]
+
+                    x3 = vertical[0][0]; y3 = vertical[0][1]
+                    x4 = vertical[1][0]; y4 = vertical[1][1]
+
+                    x = round(intersection[0])
+                    y = round(intersection[1])
+
+                    if (x1 < x < x2 or x2 < x < x1) and (y3 < y < y4 or y4 < y < y3):
+                        intersection_points.append((x, y))
+                    
         return intersection_points
 
 
