@@ -15,7 +15,7 @@ def load_json(location = "final_runs.json"):
 if __name__ == "__main__":
 
     # Load Json
-    data = load_json(location = "project_used_data/31mm/final_runs.json")
+    data = load_json(location = "project_used_data/33mm/final_runs.json")
 
     '''
         Plots End Distribution

@@ -1,5 +1,4 @@
 import pickle
-from re import L
 import numpy as np
 from WebCamFeed import WebCamFeed
 import cv2
