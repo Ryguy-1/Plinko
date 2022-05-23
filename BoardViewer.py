@@ -22,7 +22,7 @@ class BoardViewer:
         '''
         # Array Like [(x1, y1), (x2, y2), ...]
         self.current_piece_location_over_time = []
-        self.current_piece_num = 0 # Update This for Starting Save Index
+        self.current_piece_num = 91 # Update This for Starting Save Index
 
         # Minimum Area Considered as Piece
         self.contour_area_cutoff_min = 200
@@ -31,7 +31,7 @@ class BoardViewer:
         # Saturation Minimum
         self.saturation_cutoff = 120
         # Value Minimum (For Shadows)
-        self.value_cutoff = 130
+        self.value_cutoff = 140
         # Vertical Horizontal Threshold Distance
         self.vh_threshold = 300
         # Frame Delay
